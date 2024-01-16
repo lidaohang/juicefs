@@ -390,6 +390,12 @@ func (cache *cacheStore) load(key string) (ReadCloser, error) {
 		if it, ok := cache.keys[k]; ok {
 			// update atime
 			cache.keys[k] = cacheItem{it.size, uint32(time.Now().Unix())}
+			
+			// Advising the kernel to free up page cache
+			err := syscall.Fadvise(int(f.Fd()), 0, it.size, syscall.FADV_DONTNEED)
+			if err != nil {
+				// Handle error if needed
+			}
 		}
 	} else if it, ok := cache.keys[k]; ok {
 		if it.size > 0 {
